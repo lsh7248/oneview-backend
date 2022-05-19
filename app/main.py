@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from routers.api.api_v1.api import api_v1_router
 from starlette.middleware.cors import CORSMiddleware
 
 def create_app():
@@ -22,14 +23,11 @@ def create_app():
     )
 
     # 라우터 정의
-
+    app.include_router(api_v1_router)
     return app
 
 
 app = create_app()
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)
