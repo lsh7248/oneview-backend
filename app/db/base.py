@@ -1,2 +1,3 @@
-from app.db.base_class import Base
-from app.models.user import User  # noqa
+from .base_class import Base
+from ..models.user import User
+from ..models.item import Item

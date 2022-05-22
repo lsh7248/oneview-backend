@@ -1,41 +1,35 @@
+from typing import List
 
-import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from sqlalchemy.orm import Session
+from . import crud, models, schemas
+from .crud.user import create_user
+from .db.init_db import init_db
+from .db.session import SessionLocal, engine
+from .db.base import Base
+from .routers.api.api_v1.api import api_v1_router
 
+# Base.metadata.create_all(bind=engine)
+from .schemas import UserCreate
 
-from app.routers.api.api_v1.api import api_v1_router
-from starlette.middleware.cors import CORSMiddleware
-from app import models
-from app.db.session import SessionLocal, engine
-# from app.db.init_db import init_db, create_superuser
+app = FastAPI()
+init_db(SessionLocal())
+app.include_router(api_v1_router)
+# @app.middleware("http")
+# async def db_session_middleware(request: Request, call_next):
+#     response = Response("Internal server error", status_code=500)
+#     try:
+#         request.state.db = SessionLocal()
+#         response = await call_next(request)
+#     finally:
+#         request.state.db.close()
+#     return response
 
-def create_app():
-    """
-    앱 함수 실행
-    :return:
-    """
-    app = FastAPI()
+# # Dependency
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
-
-    # 데이터 베이스 이니셜라이즈
-    # init_db(SessionLocal())
-    # 레디스 이니셜라이즈
-
-    # 미들웨어 정의
-    # app.add_middleware(
-    #     CORSMiddleware,
-    #     allow_origins=["*"],
-    #     allow_credentials=True,
-    #     allow_methods=["*"],
-    #     allow_headers=["*"],
-    # )
-
-    # 라우터 정의
-    app.include_router(api_v1_router)
-    return app
-
-
-app = create_app()
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
