@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta
 from typing import Any, Union
-
-# from jose import jwt
+import os
+from dotenv import load_dotenv
 from passlib.context import CryptContext
-
+load_dotenv()
 # from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-ALGORITHM = "HS256"
+ALGORITHM = os.environ.get("JWT_ALGORITHM")
 
 
 # def create_access_token(

@@ -3,10 +3,9 @@ from sqlalchemy.orm import relationship
 
 from ..db.base_class import Base
 
-class Item(Base):
-    __tablename__ = "items"
+class Blacklist(Base):
+    __tablename__ = "blacklists"
 
-    title = Column(String(20), index=True)
-    description = Column(String(20), index=True)
+    token = Column(String(100), index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="items")
+    owner = relationship("User", back_populates="blacklists")
