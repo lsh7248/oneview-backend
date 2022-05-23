@@ -59,6 +59,14 @@ async def logout(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
     return {"detail": "Refresh Token has been revoke"}
 
 
+@router.post('/jwt/logout')
+async def logout(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+    employee_id = Authorize.get_jwt_subject()
+    user = get_user_by_employee_id(db, employee_id)
+    _ = Authorize.create_access_token(subject=user.employee_id, expires_time=0)
+    _ = Authorize.create_refresh_token(subject=user.employee_id, expires_time=0)
+    return {"detail": "Logout Success!"}
+
 @router.post('/jwt/register')
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     register_user = get_user_by_employee_id(db, user.employee_id)
