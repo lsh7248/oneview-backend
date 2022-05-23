@@ -39,7 +39,7 @@ class UserInDBBase(UserBase):
 
 
 class User(UserBase):
-    pass
+    id: Union[int, None]
 
     class Config:
         schema_extra={

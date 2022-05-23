@@ -19,9 +19,14 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = get_password_hash(user.password)
     # DB ID 쿼리 후, 가장 큰 ID값을 찾아서 +1 한 ID 값을 ID로 지정
-    # db.query(models.User).order_by
+    recent_user:schemas.User = db.query(models.User).order_by(models.User.id.desc()).first()
 
-    db_user = models.User(id=2, employee_id=user.employee_id, hashed_password=hashed_password)
+    db_user = models.User(id=recent_user.id + 1,
+                          employee_id=user.employee_id,
+                          hashed_password=hashed_password,
+                          username=user.username,
+                          email=user.email,
+                          phone=user.phone)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

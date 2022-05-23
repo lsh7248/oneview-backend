@@ -9,8 +9,8 @@ load_dotenv()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-ALGORITHM = os.environ.get("JWT_ALGORITHM")
-
+JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM")
+JWT_SECRET_CODE = os.environ.get("JWT_SECRET_CODE")
 
 # def create_access_token(
 #     subject: Union[str, Any], expires_delta: timedelta = None
