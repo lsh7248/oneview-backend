@@ -6,18 +6,11 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.core.security import verify_password
-# from app.crud.blacklist import create_blacklist
+from app.crud.blacklist import create_blacklist
 from app.crud.user import get_user_by_employee_id, create_user
 from app.routers.api.deps import get_db, get_current_active_user, get_current_user
-from app.schemas import UserCreate
+from app.schemas import UserCreate, TokenCreate
 from app.schemas.user import User
-
-# class Settings(BaseModel):
-#     authjwt_secret_key: str = "secret"
-#
-# @AuthJWT.load_config
-# def get_config():
-#     return Settings()
 
 
 router = APIRouter()
@@ -41,6 +34,32 @@ async def login(user: User, db: Session = Depends(get_db), Authorize: AuthJWT = 
     return {"access": access_token, "refresh": refresh_token}
 
 
+@router.post('/jwt/logout/access')
+async def refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+    Authorize.jwt_required()
+    current_user = Authorize.get_jwt_subject()
+
+    _user = get_user_by_employee_id(db, current_user)
+    _user_id = _user.id
+
+    decrypted_token = Authorize.get_raw_jwt()['jti']
+    create_blacklist(db, token=TokenCreate(token=decrypted_token), user_id=_user_id)
+    return {"detail": "Access Token Revoke success!"}
+
+
+@router.post('/jwt/logout/refresh')
+async def refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+    Authorize.jwt_refresh_token_required()
+    current_user = Authorize.get_jwt_subject()
+
+    _user = get_user_by_employee_id(db, current_user)
+    _user_id = _user.id
+
+    decrypted_token = Authorize.get_raw_jwt()['jti']
+    create_blacklist(db, token=TokenCreate(token=decrypted_token), user_id=_user_id)
+    return {"detail": "Refresh Token Revoke success!"}
+
+
 # @router.delete('/jwt/logout/access')
 # async def logout(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
 #     Authorize.jwt_required()
@@ -61,13 +80,13 @@ async def login(user: User, db: Session = Depends(get_db), Authorize: AuthJWT = 
 #     return {"detail": "Refresh Token has been revoke"}
 
 
-@router.post('/jwt/logout')
-async def logout(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
-    employee_id = Authorize.get_jwt_subject()
-    user = get_user_by_employee_id(db, employee_id)
-    _ = Authorize.create_access_token(subject=user.employee_id, expires_time=0)
-    _ = Authorize.create_refresh_token(subject=user.employee_id, expires_time=0)
-    return {"detail": "Logout Success!"}
+# @router.post('/jwt/logout')
+# async def logout(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+#     employee_id = Authorize.get_jwt_subject()
+#     user = get_user_by_employee_id(db, employee_id)
+#     _ = Authorize.create_access_token(subject=user.employee_id, expires_time=0)
+#     _ = Authorize.create_refresh_token(subject=user.employee_id, expires_time=0)
+#     return {"detail": "Logout Success!"}
 
 @router.post('/jwt/users')
 async def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -83,6 +102,5 @@ async def refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
 
     current_user = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(subject=current_user, expires_time=timedelta(minutes=0))
-    new_refresh_token = Authorize.create_refresh_token(subject=current_user, expires_time=timedelta(minutes=0))
-    return {"access": new_access_token, "refresh": new_refresh_token}
+    new_access_token = Authorize.create_access_token(subject=current_user)
+    return {"access": new_access_token}

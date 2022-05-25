@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
+
+from .crud.blacklist import get_blacklist
 from .db.init_db import init_db
 from .db.session import SessionLocal, engine
 from .routers.api.api_v1.api import api_v1_router
@@ -34,10 +36,22 @@ app.add_middleware(
 
 class Settings(BaseModel):
     authjwt_secret_key: str = JWT_SECRET_CODE
-    authjwt_denylist_enabled: bool = False
+    authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     access_expires: int = timedelta(minutes=60)
     refresh_expires: int = timedelta(days=1)
+
+
+@AuthJWT.token_in_denylist_loader
+def check_if_token_in_denylist(decrypted_token):
+    jti = decrypted_token['jti']
+    try:
+        db = SessionLocal()
+        token = get_blacklist(db, jti)
+    except:
+        raise HTTPException(status_code=404, detail="DB Not Con")
+
+    return not not token
 
 
 @AuthJWT.load_config
