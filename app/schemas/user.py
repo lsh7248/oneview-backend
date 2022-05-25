@@ -14,9 +14,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     # employee_id: str
     password: str
-    username: Union[str, None] = None
-    email: Union[str, None] = None
-    phone: Union[str, None] = None
+    # username: Union[str, None] = None
+    # email: Union[str, None] = None
+    # phone: Union[str, None] = None
 
 
 class UserUpdate(UserBase):

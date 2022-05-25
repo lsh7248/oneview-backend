@@ -2,6 +2,7 @@ from datetime import timedelta
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
@@ -13,13 +14,27 @@ from .core.security import JWT_SECRET_CODE
 
 
 app = FastAPI()
+
 # DB 초기화
 init_db(SessionLocal())
+# 미들웨어 추가.
+origins = [
+    "https://localhost:8081",
+    "http://localhost",
+    "http://localhost:8080",
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Settings(BaseModel):
     authjwt_secret_key: str = JWT_SECRET_CODE
-    authjwt_denylist_enabled: bool = True
+    authjwt_denylist_enabled: bool = False
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     access_expires: int = timedelta(minutes=60)
     refresh_expires: int = timedelta(days=1)

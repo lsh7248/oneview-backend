@@ -23,10 +23,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
     db_user = models.User(id=recent_user.id + 1,
                           employee_id=user.employee_id,
-                          hashed_password=hashed_password,
-                          username=user.username,
-                          email=user.email,
-                          phone=user.phone)
+                          hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -37,9 +34,9 @@ def create_superuser(db: Session, user: schemas.UserCreate):
 
     db_user = models.User(id=1,
                           employee_id=user.employee_id,
-                          username=user.username,
-                          email=user.email,
-                          phone=user.phone,
+                          # username=user.username,
+                          # email=user.email,
+                          # phone=user.phone,
                           hashed_password=hashed_password,
                           is_active=True,
                           is_superuser=True)
