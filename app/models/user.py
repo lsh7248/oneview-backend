@@ -9,8 +9,8 @@ class User(Base):
 
     employee_id = Column(String(100), unique=True, index=True)
     username = Column(String(100), default="")
-    email = Column(String(100), unique=True, default="")
-    phone = Column(String(100), unique=True, default="")
+    email = Column(String(100), default="")
+    phone = Column(String(100), default="")
     hashed_password = Column(String(100))
 
     is_active = Column(Boolean, default=True)

@@ -13,16 +13,19 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     # employee_id: str
-    password: str
+    # id: Union[int, None]
+    password: Union[str, None]
     # username: Union[str, None] = None
     # email: Union[str, None] = None
     # phone: Union[str, None] = None
 
 
+
 class UserUpdate(UserBase):
+    id: Union[int, None]
     password: Union[str, None]
     username: Union[str, None] = None
-    emai: Union[str, None] = None
+    email: Union[str, None] = None
     phone: Union[str, None] = None
     is_active: Union[bool, None] = None
     is_superuser: Union[bool, None] = None
@@ -48,6 +51,7 @@ class User(UserBase):
                 "password": "password"
             }
         }
+
 
 
 class UserInDB(UserInDBBase):

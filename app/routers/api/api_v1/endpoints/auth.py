@@ -16,10 +16,6 @@ from app.schemas.user import User
 router = APIRouter()
 
 
-@router.post('/jwt')
-async def test(aaa):
-    pass
-
 
 @router.post('/jwt/login')
 async def login(user: User, db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
@@ -88,13 +84,13 @@ async def refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends())
 #     _ = Authorize.create_refresh_token(subject=user.employee_id, expires_time=0)
 #     return {"detail": "Logout Success!"}
 
-@router.post('/jwt/users')
-async def register(user: UserCreate, db: Session = Depends(get_db)):
-    register_user = get_user_by_employee_id(db, user.employee_id)
-    if register_user:
-        raise HTTPException(status_code=401, detail="user already exist")
-    user = create_user(db, user)
-    return {"state": True, "employee_id": user.employee_id}
+# @router.post('/jwt/users')
+# async def register(user: UserCreate, db: Session = Depends(get_db)):
+#     register_user = get_user_by_employee_id(db, user.employee_id)
+#     if register_user:
+#         raise HTTPException(status_code=401, detail="user already exist")
+#     user = create_user(db, user)
+#     return {"state": True, "employee_id": user.employee_id}
 
 
 @router.post('/jwt/refresh')
