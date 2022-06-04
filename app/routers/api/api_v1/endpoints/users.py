@@ -59,18 +59,18 @@ async def read_user_by_empid(id: str, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.patch("/{id}")
+@router.patch("/{id}", response_model=User)
 async def update_user_by_id(id: int, user:UserUpdate, db: Session = Depends(get_db),
                       client=Depends(get_current_active_user)):
     if not client.is_superuser:
         if client.id != id:
             raise HTTPException(status_code=401, detail="Need Auth...")
-    _ = update_user(db, user_id=id, user=user)
+    _user = update_user(db, user_id=id, user=user)
 
-    return {"result": "Update Success!"}
+    return {"result": "Update Success!", "id": _user.id}
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=User)
 async def delete_user_by_id(id: int, db: Session = Depends(get_db),
                       client=Depends(get_current_active_user)):
     if not client.is_superuser:
