@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from ..db.base_class import KBase
 
 
-class VocList(KBase):
+class Voc(KBase):
     __tablename__ = "dashboard_voc_list"
 
     lte_only = Column(String(2000))

@@ -29,7 +29,7 @@ async def read_user(user:User = Depends(get_current_user)):
 async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), user:User = Depends(get_current_active_superuser)):
     print(user.employee_id)
     users = get_users(db, skip=skip, limit=limit)
-    print("USERS: ", users)
+    print("USERS: ", users[0].auth)
     users_out = list(map(lambda model:
         UserUpdate(
             id=model.id,
@@ -39,8 +39,17 @@ async def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_
             email=model.email,
             phone=model.phone,
             is_active=model.is_active,
-            is_superuser=model.is_superuser
+            is_superuser=model.is_superuser,
+
+            auth=model.auth,
+            belong_1=model.belong_1,
+            belong_2=model.belong_2,
+            belong_3=model.belong_3,
+            belong_4=model.belong_4,
         ), users))
+
+    print("USER[0].auth: ", users_out[0].auth)
+    print(users_out[0])
     return users_out
 
 @router.get("/{id}", response_model=User)

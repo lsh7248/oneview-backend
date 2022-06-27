@@ -8,13 +8,13 @@ class Bts(KBase):
     __tablename__ = "dashboard_bts_info_dd"
 
     equip_nm = Column(String(2000))
-    equip_cd = Column(String(2000))
+    equip_cd = Column(String(2000), primary_key=True)
     cell_cd = Column(String(2000))
     oper_team_nm = Column(String(2000))
     addr_dtl = Column(String(2000))
     bld_flor = Column(String(2000))
     biz_hq_nm = Column(String(2000))
-    sbt_bts_cd = Column(String(2000), primary_key=True)
+    sbt_bts_cd = Column(String(2000))
 
     base_date = Column(String(2000), primary_key=True)
     area_team_cd = Column(String(2000))

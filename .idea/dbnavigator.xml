@@ -28,7 +28,7 @@
     <loaded-nodes />
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="c286051e-5761-459b-b2e7-cb7522f82cc2">
+    <connection id="00c790be-3518-443f-90c5-00fba78a6868">
       <console name="Oracle" type="STANDARD" schema="main" session="Main" />
     </connection>
   </component>
@@ -36,7 +36,7 @@
     <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
-    <connection id="c286051e-5761-459b-b2e7-cb7522f82cc2" />
+    <connection id="00c790be-3518-443f-90c5-00fba78a6868" />
   </component>
   <component name="DBNavigator.Project.EditorStateManager">
     <last-used-providers />
@@ -67,10 +67,10 @@
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="c286051e-5761-459b-b2e7-cb7522f82cc2" active="true" signed="true">
+      <connection id="00c790be-3518-443f-90c5-00fba78a6868" active="true" signed="true">
         <database>
           <name value="Oracle" />
-          <description value="" />
+          <description value="Oracle" />
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
           <database-version value="3.3" />

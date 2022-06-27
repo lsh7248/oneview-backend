@@ -9,7 +9,7 @@ from app.crud.user import get_user_by_employee_id, create_superuser
 from app.db.session import engine
 from app.schemas.user import UserCreate
 from app.db import base  # noqa: F401
-from app.db.base import Base
+from app.db.base import Base, KBase
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -42,6 +42,8 @@ def init_db(db: Session) -> None:
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line
     Base.metadata.create_all(bind=engine)
+    # In Development version --> KDAP DB Model Create
+    KBase.metadata.create_all(bind=engine)
 
     if FIRST_SUPERUSER_ID:
         superuser = get_user_by_employee_id(db=db, employee_id=FIRST_SUPERUSER_ID)  # 2

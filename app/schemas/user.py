@@ -1,6 +1,7 @@
 from typing import List, Union
 from .item import Item
 from pydantic import BaseModel
+from app.models.user import UserAuthority
 
 
 class UserBase(BaseModel):
@@ -29,6 +30,12 @@ class UserUpdate(UserBase):
     phone: Union[str, None] = None
     is_active: Union[bool, None] = None
     is_superuser: Union[bool, None] = None
+
+    auth: UserAuthority = None # serAuthority
+    belong_1: Union[str, None] = None
+    belong_2: Union[str, None] = None
+    belong_3: Union[str, None] = None
+    belong_4: Union[str, None] = None
 
 
 class UserInDBBase(UserBase):

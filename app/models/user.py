@@ -5,10 +5,10 @@ import enum
 from ..db.base_class import Base
 
 class UserAuthority(str, enum.Enum):
+    EX = "관리자"
     classA = "임원"
     classB = "팀장"
     classC = "팀원"
-    EX = "관리자"
 
 class User(Base):
     __tablename__ = "users"

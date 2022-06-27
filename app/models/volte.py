@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from ..db.base_class import KBase
 
 
-class Bts(KBase):
+class Volte(KBase):
     __tablename__ = "dashboard_volte_dd"
 
     base_ym = Column(String(2000))
