@@ -22,3 +22,7 @@ class Volte(KBase):
     wjxbfs2 = Column(Integer)
     wjxbfs3 = Column(Integer)
     wjxbfs4 = Column(Integer)
+    sido_nm = Column(String(2000))
+    eup_myun_dong_nm = Column(String(2000))
+    gun_gu_nm = Column(String(2000))
+    bj_nm = Column(String(2000))

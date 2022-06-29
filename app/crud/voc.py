@@ -1,74 +1,157 @@
+from html import entities
 from sqlalchemy.orm import Session
-from sqlalchemy import func, select, case
 from app import schemas
+from sqlalchemy import func, select, between
+from datetime import datetime, timedelta
 
 from .. import models
 
-def get_vocs(db: Session, team: str = None, date: str = None, limit: int = 10):
-
-    _vocs = db.query(models.Voc, models.Bts).join(models.Bts, models.Voc.sbt_bts_cd == models.Bts.sbt_bts_cd, isouter=True)
-    if date:
-        _vocs = _vocs.filter(models.Voc.base_date == date)
-    if team:
-        _vocs = _vocs.filter(models.Bts.oper_team_nm == team)
-    _vocs = _vocs.order_by(models.Voc.sr_tt_rcp_no.desc()).limit(50).all()
-
-    list_vocs = list(map(lambda models: schemas.JoinVoc(
-                # base_ym = models[0].base_ym,
-                voc_wjt_qrtc_nm = models[0].voc_wjt_qrtc_nm,
-                equip_cd = models[0].equip_cd,
-                sr_tt_rcp_no = models[0].sr_tt_rcp_no,
-                base_date = models[0].base_date,
-                sbt_bts_cd = models[0].sbt_bts_cd,
-
-                equip_nm = models[1].equip_nm,
-                cell_cd = models[1].cell_cd,
-                oper_team_nm = models[1].oper_team_nm,
-                addr_dtl = models[1].addr_dtl,
-                bld_flor = models[1].bld_flor,
-                biz_hq_nm = models[1].biz_hq_nm
-                ), _vocs))
-
-    return list_vocs[:limit]
-
-
-def get_most_voc_bts_by_group_date(db: Session, jo: str = None, start_date: str = None, end_date: str = None, limit: int = 10):
-    entities_worst10 = [
-        models.Voc.base_ym,
-        models.Voc.base_date,
-        models.Voc.equip_cd0,
-        models.Voc.sido_nm,
-        models.Voc.eup_myun_dong_nm,
-        models.Voc.bts_oper_team_nm,
-        models.Voc.adm_cd1,
-        models.Voc.wjxbfs1
+def get_worst10_bts_by_group_date(db: Session, group: str=None, start_date: str=None, end_date: str=None, limit: int=10):
+    voc_cnt = func.sum(func.nvl(models.VocList.wjxbfs1, 0))
+    voc_cnt = func.coalesce(voc_cnt, 0).label("voc_cnt")
+    juso = func.concat(models.VocList.sido_nm, models.VocList.eup_myun_dong_nm).label("juso")
+    
+    entities = [
+        models.VocList.equip_cd0,
+        juso,
+        models.VocList.bts_oper_team_nm,
+        models.VocList.adm_cd1
     ]
-    func.sum(case(value=models.Voc.wjxbfs1, whens={3: 1}, else_=0)).label("voc_cnt")
-
-    pass
-
-def get_voc_count_group_by_group_date(db: Session, jo: str = None, start_date: str = None, end_date: str = None, limit: int = 10):
-    entities_worst10 = [
-        models.Voc.base_ym,
-        models.Voc.base_date,
-        models.Voc.equip_cd0,
-        models.Voc.sido_nm,
-        models.Voc.eup_myun_dong_nm,
-        models.Voc.bts_oper_team_nm,
-        models.Voc.adm_cd1,
+    entities_groupby = [
+        voc_cnt
     ]
-    sum_fn = func.count(models.Voc.wjxbfs1).label("voc_cnt")
-    pass
+    stmt = select(*entities, *entities_groupby)
+    
+    if not end_date:
+        end_date = start_date
+        
+    if start_date:
+        stmt = stmt.where(between(models.VocList.base_date, start_date, end_date))
+    
+    if group:
+        stmt = stmt.where(models.VocList.bts_oper_team_nm == group)
+    
+    stmt = stmt.group_by(*entities).order_by(voc_cnt.desc())
+    
+    query_result = db.execute(stmt).fetchmany(size=limit)
+    list_worst_voc_bts = list(map(lambda x: schemas.VocBtsOutput(
+                                기지국명 = x[0],
+                                voc_cnt= x[4],
+                                juso=x[1],
+                                team= x[2],
+                                jo= x[3]
+                                ), query_result))
+    return list_worst_voc_bts
 
-def get_voc_count_group_by_group_month(db: Session, jo: str = None, start_date: str = None, end_date: str = None, limit: int = 10):
-    entities_worst10 = [
-        models.Voc.base_ym,
-        models.Voc.base_date,
-        models.Voc.equip_cd0,
-        models.Voc.sido_nm,
-        models.Voc.eup_myun_dong_nm,
-        models.Voc.bts_oper_team_nm,
-        models.Voc.adm_cd1,
+
+def get_voc_list_by_group_date(db: Session, group: str=None, start_date: str=None, end_date: str=None, limit: int=1000):
+    entities=[
+        models.VocList.base_date,
+        models.VocList.sr_tt_rcp_no,
+        models.VocList.voc_type_nm,
+        models.VocList.voc_wjt_scnd_nm,
+        models.VocList.voc_wjt_tert_nm,
+        models.VocList.voc_wjt_qrtc_nm,
+        models.VocList.svc_cont_id,
+        models.VocList.hndset_pet_nm,
+        models.VocList.anals_5_prod_level_nm,
+        models.VocList.bprod_nm,
+        models.VocList.equip_cd0,
+        models.VocList.bts_oper_team_nm,
+        models.VocList.adm_cd1,
     ]
-    sum_fn = func.count(models.Voc.wjxbfs1).label("voc_cnt")
-    pass
+    stmt = select(*entities)
+    if not end_date:
+        end_date = start_date
+        
+    if start_date:
+        stmt = stmt.where(between(models.VocList.base_date, start_date, end_date))
+    
+    if group:
+        stmt = stmt.where(models.VocList.bts_oper_team_nm == group)
+
+    query_result = db.execute(stmt).fetchmany(size=limit)
+    list_voc_list = list(map(lambda x: schemas.VocListOutput(
+                                기준년원일= x[0],
+                                VOC접수번호= x[1],
+                                VOC유형= x[2],
+                                VOC2차업무유형= x[3],
+                                VOC3차업무유형= x[4],
+                                VOC4차업무유형= x[5],
+                                서비스계약번호= x[6],
+                                단말기명= x[7],
+                                분석상품레벨3= x[8],
+                                요금제= x[9],
+                                # TT번호: Union[str, None]
+                                # TT발행주소: Union[str, None]
+                                # 상담처리내역: Union[str, None]
+                                주기지국= x[10],
+                                주기지국팀= x[11],
+                                주기지국조= x[12],
+                                ), query_result))
+    return list_voc_list
+
+def get_voc_trend_by_group_date(db: Session, group: str, start_date: str=None, end_date: str=None):
+    voc_cnt = func.sum(func.nvl(models.VocList.wjxbfs1, 0))
+    voc_cnt = func.coalesce(voc_cnt, 0).label("voc_cnt")
+
+    entities = [
+        models.VocList.base_date
+    ]
+    entities_groupby = [
+        voc_cnt
+    ]
+
+    stmt = select(*entities, *entities_groupby)
+    
+    if not end_date:
+        end_date = start_date
+        
+    if start_date:
+        stmt = stmt.where(between(models.VocList.base_date, start_date, end_date))
+    
+    stmt = stmt.where(models.VocList.bts_oper_team_nm == group)
+    
+    stmt = stmt.group_by(*entities, models.VocList.bts_oper_team_nm).order_by(models.VocList.base_date.asc())
+    query_result = db.execute(stmt).all()
+    list_voc_trend = list(map(lambda x: schemas.VocTrendOutput(
+                                date=x[0],
+                                value=int(x[1])
+                                ), query_result))
+    return list_voc_trend
+
+def get_voc_event_by_group_date(db: Session, group: str, date:str=None):
+    # today = datetime.today().strftime("%Y%m%d")
+    # yesterday = (datetime.today() - timedelta(1)).strftime("%Y%m%d")
+    today = date
+    yesterday = (datetime.strptime(date, "%Y%m%d") - timedelta(1)).strftime("%Y%m%d")  
+    in_cond = [yesterday, today]
+
+    voc_cnt = func.sum(func.nvl(models.VocList.wjxbfs1, 0))
+    voc_cnt = func.coalesce(voc_cnt, 0).label("voc_cnt")
+
+    entities = [
+        models.VocList.base_date,
+        models.VocList.bts_oper_team_nm
+    ]
+    entities_groupby = [
+        voc_cnt
+    ]
+
+    stmt = select([*entities, *entities_groupby], models.VocList.base_date.in_(in_cond)).\
+            where(models.VocList.bts_oper_team_nm == group).group_by(*entities).order_by(models.VocList.base_date.asc())
+    query_result = db.execute(stmt).all()
+
+    try:
+        yesterday_score = query_result[0][2]
+        today_score = query_result[1][2]
+        event_rate = (today_score - yesterday_score) / yesterday_score * 100
+    except:
+        return None
+
+    voc_event = schemas.VocEventOutput(
+        title= "품질VOC 발생건수(전일대비)",
+        score= today_score,
+        rate= event_rate
+    )
+    return voc_event
