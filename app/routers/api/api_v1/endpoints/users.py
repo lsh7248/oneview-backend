@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.user import create_user, get_users, get_user, get_user_by_employee_id, update_user, delete_user
 from app.routers.api.deps import get_db, get_current_user, get_current_active_superuser, get_current_active_user
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User, UserCreate, UserUpdate, UserMe
 
 router = APIRouter()
 
@@ -16,13 +16,24 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     if register_user:
         raise HTTPException(status_code=401, detail="user already exist")
     user = create_user(db, user)
-    return {"state": True, "employee_id": user.employee_id}
+    return {"result": True, "employee_id": user.employee_id}
 
 
 
-@router.get("/me", response_model=User)
+@router.get("/me", response_model=UserMe)
 async def read_user(user:User = Depends(get_current_user)):
-    return {"employee_id": user.employee_id}
+    userMe = UserMe(
+        id = user.id,
+        username = user.username,
+        employee_id = user.employee_id,
+        auth = user.auth,
+        belong_1 = user.belong_1,
+        belong_2 = user.belong_2,
+        belong_3 = user.belong_3,
+        belong_4 = user.belong_4,
+    )
+    return userMe
+    # return {"employee_id": user.employee_id}
 
 
 @router.get("/", response_model=List[UserUpdate])

@@ -4,13 +4,25 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..core.security import get_password_hash
 
-
+# _user = db.query(models.User).filter(models.User.id == user_id).first()
+# print(_user)
+# print(_user.id)
+# user = schemas.User(
+#     id=_user.id,
+#     username=_user.username,
+#     auth=_user.auth,
+#     belong_1=_user.belong_1,
+#     belong_2=_user.belong_2,
+#     belong_3=_user.belong_3,
+#     belong_4=_user.belong_4,
+# )
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
 def get_user_by_employee_id(db: Session, employee_id: str):
-    return db.query(models.User).filter(models.User.employee_id == employee_id).first()
+    _user = db.query(models.User).filter(models.User.employee_id == employee_id).first()
+    return _user
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):

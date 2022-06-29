@@ -10,7 +10,7 @@ from app.crud.blacklist import create_blacklist
 from app.crud.user import get_user_by_employee_id, create_user
 from app.routers.api.deps import get_db, get_current_active_user, get_current_user
 from app.schemas import UserCreate, TokenCreate
-from app.schemas.user import User
+from app.schemas.user import User, UserBase
 
 
 router = APIRouter()
@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.post('/jwt/login')
-async def login(user: User, db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+async def login(user: UserBase, db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
     login_user = get_user_by_employee_id(db, user.employee_id)
     if not login_user:
         raise HTTPException(status_code=401,detail="Bad user id")
