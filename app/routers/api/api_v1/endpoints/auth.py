@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app import schemas
 from app.core.security import verify_password
 from app.crud.blacklist import create_blacklist
-from app.crud.user import get_user_by_employee_id, create_user
+from app.crud.user import get_user_by_id, create_user
 from app.routers.api.deps import get_db, get_current_active_user, get_current_user
 from app.schemas import UserCreate, TokenCreate
 from app.schemas.user import User, UserBase
@@ -16,44 +16,44 @@ from app.schemas.user import User, UserBase
 router = APIRouter()
 
 
-
 @router.post('/jwt/login')
 async def login(user: UserBase, db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
-    login_user = get_user_by_employee_id(db, user.employee_id)
+    login_user = get_user_by_id(db, user.user_id)
     if not login_user:
         raise HTTPException(status_code=401,detail="Bad user id")
     if not verify_password(user.password, login_user.hashed_password):
         raise HTTPException(status_code=401,detail="Bad password")
 
-    access_token = Authorize.create_access_token(subject=user.employee_id)
-    refresh_token = Authorize.create_refresh_token(subject=user.employee_id)
+    access_token = Authorize.create_access_token(subject=user.user_id, expires_time=timedelta(minutes=60))
+    refresh_token = Authorize.create_refresh_token(subject=user.user_id, expires_time=timedelta(days=1))
     return {"access": access_token, "refresh": refresh_token}
 
 
 @router.post('/jwt/logout/access')
-async def refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+async def logout_access(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
     Authorize.jwt_required()
     current_user = Authorize.get_jwt_subject()
 
-    _user = get_user_by_employee_id(db, current_user)
-    _user_id = _user.id
+    _user = get_user_by_id(db, current_user)
+    _user_id = _user.user_id
 
     decrypted_token = Authorize.get_raw_jwt()['jti']
-    create_blacklist(db, token=TokenCreate(token=decrypted_token), user_id=_user_id)
+    create_blacklist(db, token=decrypted_token, user_id=_user_id)
     return {"detail": "Access Token Revoke success!"}
 
 
 @router.post('/jwt/logout/refresh')
-async def refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+async def logout_refresh(db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
 
-    _user = get_user_by_employee_id(db, current_user)
-    _user_id = _user.id
+    _user = get_user_by_id(db, current_user)
 
+    _user_id = _user.user_id
     decrypted_token = Authorize.get_raw_jwt()['jti']
-    create_blacklist(db, token=TokenCreate(token=decrypted_token), user_id=_user_id)
-    return {"detail": "Refresh Token Revoke success!"}
+
+    db_blacklist = create_blacklist(db, token=decrypted_token, user_id=_user_id)
+    return {"detail": db_blacklist}
 
 
 # @router.delete('/jwt/logout/access')
@@ -98,5 +98,5 @@ async def refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
 
     current_user = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(subject=current_user)
+    new_access_token = Authorize.create_access_token(subject=current_user, expires_time=timedelta(minutes=60))
     return {"access": new_access_token}

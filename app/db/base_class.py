@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import as_declarative, declared_attr, declarativ
 
 @as_declarative()
 class Base:
-    id = Column(Integer, primary_key=True, index=False)
+    # id = Column(Integer, primary_key=True, index=False)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     __name__: str

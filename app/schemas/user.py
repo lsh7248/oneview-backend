@@ -5,7 +5,7 @@ from app.models.user import UserAuthority
 
 
 class UserBase(BaseModel):
-    employee_id: Union[str, None]
+    user_id: Union[str, None]
     password: Union[str, None]
     # username: Union[str, None]
     # email: Union[str, None]
@@ -21,11 +21,9 @@ class UserCreate(UserBase):
     # phone: Union[str, None] = None
 
 
-
 class UserUpdate(UserBase):
-    id: Union[int, None]
     password: Union[str, None]
-    username: Union[str, None] = None
+    user_name: Union[str, None] = None
     email: Union[str, None] = None
     phone: Union[str, None] = None
     is_active: Union[bool, None] = None
@@ -37,6 +35,19 @@ class UserUpdate(UserBase):
     belong_3: Union[str, None] = None
     belong_4: Union[str, None] = None
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "user_id": "10151032",
+                "auth": "직원",
+                "belong_1": "네트워크부문",
+                "belong_2": "네트워크운용혁신담당",
+                "belong_3": "네트워크운용혁신담당",
+                "belong_4": "네트워크AI개발P-TF",
+
+            }
+        }
+
 
 class UserInDBBase(UserBase):
     id: Union[int, None]
@@ -47,10 +58,14 @@ class UserInDBBase(UserBase):
     class Config:
         orm_mode = True
 
-class UserMe(BaseModel):
-    id: Union[int, None]
-    employee_id: Union[str, None]
-    username: Union[str, None] = None
+
+class UserOutput(BaseModel):
+    user_id: Union[str, None]
+    user_name: Union[str, None] = None
+    email: Union[str, None] = None
+    phone: Union[str, None] = None
+    is_active: Union[bool, None] = None
+    is_superuser: Union[bool, None] = None
     auth: UserAuthority = None  # serAuthority
     belong_1: Union[str, None] = None
     belong_2: Union[str, None] = None
@@ -60,8 +75,12 @@ class UserMe(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "id": 1,
-                "employee_id": "10151032",
+                "user_id": "10151032",
+                "user_name": "이성현",
+                "email": "s-hyun.lee@kt.com",
+                "phone": "01012345678",
+                "is_active": True,
+                "is_superuser": True,
                 "auth": "직원",
                 "belong_1": "네트워크부문",
                 "belong_2": "네트워크운용혁신담당",

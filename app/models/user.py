@@ -13,8 +13,8 @@ class UserAuthority(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    employee_id = Column(String(100), unique=True, index=True)
-    username = Column(String(100), default="")
+    user_id = Column(String(100), primary_key=True, index=False)
+    user_name = Column(String(100), default="")
     email = Column(String(100), default="")
     phone = Column(String(100), default="")
     hashed_password = Column(String(100))
@@ -30,3 +30,5 @@ class User(Base):
 
     items = relationship("Item", back_populates="owner")
     blacklists = relationship("Blacklist", back_populates="owner")
+    events_bts_comment = relationship("EventsBtsComment", back_populates="owner")
+    user_dashboard_configs = relationship("UserDashboardConfig", back_populates="owner")
